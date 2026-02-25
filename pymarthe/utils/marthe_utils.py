@@ -841,7 +841,7 @@ def read_prn(prnfile = 'historiq.prn'):
 
     Examples:
     --------
-    prn_df = read_mi_prn(prnfile = 'historiq.prn')
+    prn_df = read_prn(prnfile = 'historiq.prn')
     """
     # ---- Check if prnfile exist
     path, file = os.path.split(prnfile)
@@ -849,24 +849,26 @@ def read_prn(prnfile = 'historiq.prn'):
     assert file in os.listdir(os.path.normpath(path)), msg
     # ---- Build Multiple index columns
     add_skip = 1
-    with open(prnfile, 'r', encoding=encoding) as f:
+    with open(prnfile, 'r', encoding=ENCODING) as f:
         # ----Fetch 5 first lines of prn file 
         
         # am 2023-11-24 : in some version of marthe, no empty col at the end of file.
         # using [:-1] would drop a real column and raise error while renaming columns in line 904
         # flines_arr = np.array([f.readline().split('\t')[:-1] for i in range(5)], dtype=list)
-        flines_arr = np.array([f.readline().split('\t') for i in range(5)], dtype=list)
+        flines_arr = np.array([f.readline().split('\t') for i in range(6)], dtype=list)
 
         # ---- Create a boolean mask to read only usefull header lines
-        mask = [False, True, False, True , False]
+        mask = [False, True, False, True,False, False]
         # ---- Select only usefull first lines by mask
-        if any('Main_Grid' in elem for elem in flines_arr[-2]):
+        if any('Main_Grid' in elem for elem in flines_arr[-3]):
             nest = True 
             # -- Transform to fancy integer 'inest' number
-            flines_arr[-2] = ['0' if not 'Gigogne' in g else g.split(':')[1].strip()
-                                  for g in flines_arr[-2]]
+            flines_arr[-3] = ['0' if not 'Gigogne' in g else g.split(':')[1].strip()
+                                  for g in flines_arr[-3]]
             # -- Add -gigone- boolean to mask
-            mask[-1] = nest
+            #mask[-1] = nest
+            mask = [False, True, False, True , False, True]
+            add_skip = 2
         else:
             if any('Niveau_Lac' in elem for elem in flines_arr[-4]):
                 flines_arr[-2] = flines_arr[-1]
@@ -884,10 +886,11 @@ def read_prn(prnfile = 'historiq.prn'):
     date_col = headers[0][0].strip(' ')==headers[0][1].strip(' ')
     # remove time column and parse dates when date column is present
     if date_col:
+        
         # ---- Get all headers as tuple
         tuples = [tuple(map(str.strip,list(t)) ) for t in list(zip(*headers))][2:]
         # ---- Read prn file without headers (with date format)
-        df = pd.read_csv(prnfile, sep='\t', encoding=encoding, 
+        df = pd.read_csv(prnfile, sep='\t', encoding=ENCODING,
                          skiprows=mask.count(True) + add_skip, index_col = 0,
                          parse_dates = True, dayfirst=True)
         # am 2023-11-24: in recent version of pandas, inplace is not authorized anymore
@@ -897,7 +900,7 @@ def read_prn(prnfile = 'historiq.prn'):
         # ---- Get all headers as tuple
         tuples = [tuple(map(str.strip,list(t)) ) for t in list(zip(*headers))][1:]
         # ---- Read prn file without headers (time is not a date)
-        df = pd.read_csv(prnfile, sep='\t', encoding=encoding, 
+        df = pd.read_csv(prnfile, sep='\t', encoding=ENCODING,
                          skiprows=mask.count(True) + add_skip, index_col = 0,
                          )
     # ---- Format DateTimeIndex or float
@@ -917,7 +920,6 @@ def read_prn(prnfile = 'historiq.prn'):
         df.columns = df.columns.set_levels(levels = levels, level='inest')
     # ---- Return prn DataFrame
     return df
-
 
 
 
