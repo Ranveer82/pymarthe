@@ -489,7 +489,7 @@ class MarthePump():
         re_istep = r"\*{3}\s*Le pas|Début"
 
         # ---- Fetch .pastp file content by lines
-        with open(self.pastp_file, 'r') as f:
+        with open(self.pastp_file, 'r', encoding=encoding) as f:
             lines = f.readlines()
 
         # ---- Initialize lines list and timestep counter
@@ -526,7 +526,7 @@ class MarthePump():
                 new_lines.append(line)
 
         # ---- Write all data
-        with open(self.pastp_file, 'w') as f:
+        with open(self.pastp_file, 'w', encoding=encoding) as f:
             f.write(''.join(new_lines))
 
 
@@ -564,7 +564,7 @@ class MarthePump():
         # ---- Define mode tag
         mode_tag = '/DEBIT/' if self.mode == 'aquifer' else '/Q_EXTER_RIVI/'
         # ---- Extract pastp steady-state data (first data block)
-        with open(self.pastp_file, 'r') as f:
+        with open(self.pastp_file, 'r', encoding=encoding) as f:
             steady_block = re.findall(re_block, f.read(), re.DOTALL)[0]
 
         # ---- Rewrite steady-stade data in pastp file

@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# PyMarthe : write model inputs (grids and lists) from a configuration file
+# ---------------------------------------------------------------------------
+#
+# Run with:
+#     python scripts/write_model_inputs.py examples/model_inputs.yaml
+# or:
+#     python -m pymarthe.helpers.model_inputs examples/model_inputs.yaml
+#
+# Paths below are resolved relative to THIS configuration file, so the command
+# can be launched from any working directory.
+#
+# NOTE : this example is non-destructive. Each property is written to a
+#        `*_updated` copy (see the `filename:` keys) so the original didac3
+#        model files are left untouched. Remove the `filename:` keys to write
+#        the values back into the model input files in place (the usual
+#        forward-run behaviour).
+# ---------------------------------------------------------------------------
+
+model:
+  rma: didac3/Didact3.rma      # path to the MARTHE .rma file
+  spatial_index: false         # optional : false (default), true, or a path
+
+inputs:
+
+  # -- Grid-like property (MartheField) --------------------------------------
+  #    Fields : permh, emmca, emmli, kepon, ...
+  #    Selectors : `layer` and `inest` (both optional ; a set with no
+  #                selector applies to every active cell of the field).
+  - property: permh
+    use_imask: true            # optional MartheField argument (default true)
+    filename: didac3/Didact3_updated.permh   # optional output (omit to overwrite)
+    set:
+      - {value: 1.0e-3, layer: 0}        # layer 0 -> 1e-3 m/s
+      - {value: 5.0e-4, layer: [1, 2]}   # layers 1 and 2 -> 5e-4 m/s
+
+  # -- List-like soil property (MartheSoil) ----------------------------------
+  #    Property : soil
+  #    `soilprop` is REQUIRED ; selectors are `zone` and `istep` (optional).
+  - property: soil
+    filename: didac3/Didact3_updated.mart    # optional output (omit to overwrite)
+    set:
+      - {soilprop: cap_sol_progr, value: 120.0, zone: [1, 2]}
+      - {soilprop: t_demi_percol, value: 3.0}          # all zones
+
+  # -- List-like pumping property (MarthePump) -------------------------------
+  #    Properties : aqpump (aquifer) and rivpump (river).
+  #    Selectors : istep, node, layer, i, j, boundname (all optional).
+  #    (Commented out : the didac3 didactic model has no pumping. Pumping data
+  #     is always written back into the model .pastp / listm / record files,
+  #     so the `filename` override is not available for aqpump / rivpump.)
+  #
+  # - property: aqpump
+  #   set:
+  #     - {value: -50.0, boundname: [p1, p2], istep: 0}
+  #     - {value: -12.4, layer: 0, i: 33, j: 18}

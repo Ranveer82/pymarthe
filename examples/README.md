@@ -37,3 +37,27 @@ Then, to launch a guide, consider using:
 ```shell
 jupyter notebook Basic_usage.ipynb
 ```
+
+<br>
+
+Write model inputs from a config file :pencil2:
+-----------------------------------------------
+
+The `model_inputs.yaml` file is a small, documented example showing how to set
+values on the model **grids** (`MartheField` : `permh`, `emmca`, ...) and
+**lists** (`MarthePump` : `aqpump`, `rivpump` ; `MartheSoil` : `soil`) from a
+single YAML (or JSON) configuration file, and write them back into the MARTHE
+input files &mdash; no python needed:
+
+```shell
+python ../scripts/write_model_inputs.py model_inputs.yaml
+# equivalently:
+python -m pymarthe.helpers.model_inputs model_inputs.yaml
+```
+
+From python:
+
+```python
+from pymarthe.helpers.model_inputs import write_model_inputs
+mm = write_model_inputs('model_inputs.yaml')
+```

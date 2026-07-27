@@ -574,7 +574,9 @@ def read_grid_file(grid_file, keep_adj=False, start=None, end=None):
                                                          r'\[Num_Rows_/_y_/_dy]']
 
     # ---- Define infos regex
-    re_headers = [r"Field=(.+)\n",
+    #      (`Field` value may be empty, e.g. 'Field=\n', so use '*' not '+'
+    #       to keep the header count aligned with the number of grids)
+    re_headers = [r"Field=(.*)\n",
                   r"Time_Step=([-+]?\d*\.?\d+|\d+)",
                   r"\nLayer=(\d+)",
                   r"Nest_grid=(\d+)",
